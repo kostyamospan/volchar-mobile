@@ -1,4 +1,5 @@
 import 'package:deplom/models/dialog_preview.dart';
+import 'package:deplom/widgets/medium_size_circle_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:deplom/header.dart';
 
@@ -20,16 +21,8 @@ class _DialogPreviewState extends State<DialogPreview> {
       height: 70,
       child: Row(
         children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(left: 5, right: 10),
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 2),
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(widget.data.imageUrl))),
+          CircleAvatarMedium(
+            imagePath: widget.data.imageUrl,
           ),
           Expanded(
             child: Padding(

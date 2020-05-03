@@ -1,3 +1,4 @@
+import 'package:deplom/widgets/medium_size_circle_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:deplom/header.dart';
 
@@ -18,19 +19,14 @@ class _CommentState extends State<Comment> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(left: 5, right: 10, top: 12),
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-                color: Colors.green,
-                border: Border.all(color: Colors.black, width: 2),
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(
-                        'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg'))),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: CircleAvatarMedium(
+              imagePath:
+                  'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg',
+            ),
           ),
+          //
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(top: 5),

@@ -1,9 +1,9 @@
 import 'package:deplom/header.dart';
 import 'package:deplom/models/user.dart';
+import 'package:deplom/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:deplom/widgets/publication.dart';
 import 'package:deplom/query_api.dart';
-import 'package:deplom/header.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(this.username, {Key key}) : super(key: key);
@@ -16,14 +16,15 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   Future<List<Widget>> loadPublications() async {
     return Future(() async {
-      var apiRez = await QueryApi.getUserData(widget.username);
+      var user = await StorageManager.isUserExist();
+      var apiRez = await QueryApi.getUserData(user.username, widget.username);
       var publ = List<Widget>.generate(apiRez.publications.length, (i) {
         print(apiRez.publications[i].imagePath);
         return new PublicationCard(apiRez.publications[i]);
       });
 
       var header = ProfileHeader(apiRez);
-      publ.insert(0,header);
+      publ.insert(0, header);
       return publ;
       // Future(()=>List<PublicationCard>.generate(10, (i){
       //   return new PublicationCard(new Publication(creator: new User(username:"username"),imageUrl: "https://img4.goodfon.ru/wallpaper/nbig/3/a0/osen-derevia-pririoda.jpg"));
@@ -47,8 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
               case ConnectionState.done:
                 {
                   if (snapshot.data != null) {
-                    return ListView(
-                        children: snapshot.data as List<Widget>);
+                    return ListView(children: snapshot.data as List<Widget>);
                   } else {
                     return Text("Error");
                   }
@@ -59,9 +59,31 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-class ProfileHeader extends StatelessWidget {
+class ProfileHeader extends StatefulWidget {
   final User data;
   const ProfileHeader(this.data, {Key key}) : super(key: key);
+
+  @override
+  _ProfileHeaderState createState() => _ProfileHeaderState();
+}
+
+class _ProfileHeaderState extends State<ProfileHeader> {
+  Future<bool> subscribeF(bool isActive) async {
+    bool isSuccess;
+    if (isActive) {
+      isSuccess = await QueryApi.subscribe(
+          (await StorageManager.isUserExist()).apiToken, widget.data.username);
+      if (isSuccess) {
+        return Future<bool>(() => !isActive);
+      }
+    } else {
+      isSuccess = await QueryApi.unSubscribe(
+          (await StorageManager.isUserExist()).apiToken, widget.data.username);
+      if (isSuccess) {
+        return Future<bool>(() => !isActive);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +100,12 @@ class ProfileHeader extends StatelessWidget {
                   shape: BoxShape.circle,
                   image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: NetworkImage(data.profileImagePathWidthDomain)),
+                      image: NetworkImage(
+                          widget.data.profileImagePathWidthDomain)),
                 )),
           ),
           Text(
-            data.username,
+            widget.data.username,
             textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35),
           ),
@@ -92,18 +115,9 @@ class ProfileHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(3)),
-                  width: 150,
-                  height: 40,
-                  child: Center(
-                      child: Text("Subscribe",
-                          style: TextStyle(fontSize: 20, color: Colors.white))),
-                ),
+              SubscribeButton(
+                onTap: subscribeF,
+                isSubscribed: widget.data.isSubscribed,
               ),
               GestureDetector(
                 onTap: () {},
@@ -133,7 +147,7 @@ class ProfileHeader extends StatelessWidget {
                     SizedBox(
                       height: 5,
                     ),
-                    Text(data.subsctibersCount.toString(),
+                    Text(widget.data.subsctibersCount.toString(),
                         style: TextStyle(fontSize: 20)),
                   ],
                 ),
@@ -144,7 +158,7 @@ class ProfileHeader extends StatelessWidget {
                     SizedBox(
                       height: 5,
                     ),
-                    Text(data.publicationsCount.toString(),
+                    Text(widget.data.publicationsCount.toString(),
                         style: TextStyle(fontSize: 20)),
                   ],
                 )
@@ -159,6 +173,53 @@ class ProfileHeader extends StatelessWidget {
               height: 1,
               color: Colors.black)
         ],
+      ),
+    );
+  }
+}
+
+class SubscribeButton extends StatefulWidget {
+  SubscribeButton({this.onTap, this.isSubscribed = true, Key key})
+      : super(key: key);
+  bool isSubscribed;
+  final Future<bool> Function(bool) onTap;
+  @override
+  _SubscribeButtonState createState() => _SubscribeButtonState();
+}
+
+class _SubscribeButtonState extends State<SubscribeButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: GestureDetector(
+        onTap: () async {
+          if (widget.onTap != null) {
+            setState(() {
+              widget.onTap(widget.isSubscribed).then((resoult) {
+                widget.isSubscribed = !resoult;
+              });
+            });
+          }
+        },
+        child: widget.isSubscribed != true
+            ? Container(
+                decoration: BoxDecoration(
+                    color: Colors.blue, borderRadius: BorderRadius.circular(3)),
+                width: 150,
+                height: 40,
+                child: Center(
+                    child: Text("Subscribe",
+                        style: TextStyle(fontSize: 20, color: Colors.white))),
+              )
+            : Container(
+                decoration: BoxDecoration(
+                    color: Colors.grey, borderRadius: BorderRadius.circular(3)),
+                width: 150,
+                height: 40,
+                child: Center(
+                    child: Text("Subscribed",
+                        style: TextStyle(fontSize: 20, color: Colors.white))),
+              ),
       ),
     );
   }

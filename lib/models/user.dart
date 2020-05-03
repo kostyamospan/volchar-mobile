@@ -22,6 +22,8 @@ class User {
 
   String profileImagePathWidthDomain;
 
+  bool isSubscribed;
+
   User({
     this.apiToken,
     this.username,
@@ -38,7 +40,8 @@ class User {
     subsctibersCount = json["SubscribersCount"];
     profileImagePath = json["ProfileImage"];
     profileImagePathWidthDomain = profileImagePath == null? null :  fullDomen + profileImagePath;
-
+    isSubscribed = json["IsSubscribed"];
+    
     List<Map<String, dynamic>> rez =
         json["Publications"] != "null" && json.containsKey("Publications")
             ? List<Map<String, dynamic>>.from(json["Publications"])
@@ -59,6 +62,7 @@ class User {
         'Username': username,
         'Password': password,
         'Email': email,
-        'Publications': jsonEncode(publications)
+        'Publications': jsonEncode(publications),
+        'ProfileImage':profileImagePath
       };
 }

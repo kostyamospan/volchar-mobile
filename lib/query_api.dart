@@ -22,7 +22,7 @@ class QueryApi {
       http.Response response = await http.post("$apiURL/app/login",
           body: jsonEncode(user.toMap()),
           headers: {'Content-type': 'application/json'});
-      return response.body != "null"
+      return response.body != "null" && response.statusCode == 200
           ? new User.fromMap(jsonDecode(response.body))
           : null;
     } catch (FormatException) {
@@ -30,11 +30,11 @@ class QueryApi {
     }
   }
 
-  static Future<List<Publication>> getAllUsersPublications(
+  static Future<List<Publication>> allUsersSubscribedPubl(
       String apiToken, String username) async {
     try {
       http.Response response = await http.post(
-          "$apiURL/app/getAllUsersPublications",
+          "$apiURL/app/allUsersSubscribes",
           body: jsonEncode({'apiToken': apiToken, 'username': username}),
           headers: {'Content-type': 'application/json'});
 
@@ -53,10 +53,10 @@ class QueryApi {
     }
   }
 
-  static Future<User> getUserData(String username) async {
+  static Future<User> getUserData(String username,String usernameOwner) async {
     try {
       http.Response response = await http.post("$apiURL/app/getUserData",
-          body: jsonEncode(username),
+          body: jsonEncode({'username': username, 'usernameOwner': usernameOwner}),
           headers: {'Content-type': 'application/json'});
 
       User rez = response.body != "null"
@@ -99,4 +99,35 @@ class QueryApi {
       return false;
     }
   }
+  
+  static Future<bool> subscribe(String apiToken, String username) async {
+    try {
+      http.Response response = await http.post("$apiURL/app/subscribe",
+          body: jsonEncode({'apiToken': apiToken, 'username': username}),
+          headers: {'Content-type': 'application/json'});
+
+      if (response.statusCode == 200)
+        return true;
+      else
+        return false;
+    } catch (Exception) {
+      return false;
+    }
+  }
+
+  static Future<bool> unSubscribe(String apiToken, String username) async {
+    try {
+      http.Response response = await http.post("$apiURL/app/unSubscribe",
+          body: jsonEncode({'apiToken': apiToken, 'username': username}),
+          headers: {'Content-type': 'application/json'});
+
+      if (response.statusCode == 200)
+        return true;
+      else
+        return false;
+    } catch (Exception) {
+      return false;
+    }
+  }
+  
 }

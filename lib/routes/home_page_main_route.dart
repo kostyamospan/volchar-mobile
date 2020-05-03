@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
     return Future(() async {
       User user = await StorageManager.isUserExist();
       var apiRez =
-          await QueryApi.getAllUsersPublications(user.apiToken, user.username);
+          await QueryApi.allUsersSubscribedPubl(user.apiToken, user.username);
       var rez = List<PublicationCard>.generate(apiRez.length, (i) {
         print(apiRez[i].imagePath);
         return new PublicationCard(apiRez[i]);
@@ -60,8 +60,15 @@ class _HomePageState extends State<HomePage> {
               case ConnectionState.done:
                 {
                   if (snapshot.data != null) {
-                    return ListView(
-                        children: snapshot.data as List<PublicationCard>);
+                    return RefreshIndicator(
+                      onRefresh: () {
+                        print("asdasd");
+                        return Future(() => null);
+                      },
+                      child: ListView(
+                          //physics: AlwaysScrollableScrollPhysics(),
+                          children: snapshot.data as List<PublicationCard>),
+                    );
                   } else {
                     return Text("Error");
                   }

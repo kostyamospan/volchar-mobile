@@ -13,7 +13,7 @@ final RegExp emailReg = new RegExp(
 const String passError = 'Must be longer then 8 and less then 32 char. long';
 const String reqError = "The field is requared";
 
-const String domenName = "825d09a2.ngrok.io";
+const String domenName = "56483eaa.ngrok.io";
 const String fullDomen = "https://$domenName";
 const String apiURL = "$fullDomen/api";
 

@@ -1,5 +1,4 @@
 import 'package:deplom/routes/login_route.dart';
-import 'package:deplom/routes/profile_page.dart';
 import 'package:deplom/routes/register_route.dart';
 import 'package:flutter/material.dart';
 import './routes/start_route.dart';

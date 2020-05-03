@@ -1,4 +1,5 @@
 import 'package:deplom/query_api.dart';
+import 'package:deplom/routes/profile_owner_page.dart';
 import 'package:deplom/routes/profile_page.dart';
 import 'package:deplom/storage_manager.dart';
 import 'package:flutter/material.dart';
@@ -78,11 +79,26 @@ class PublicationCardState extends State<PublicationCard>
                   child: GestureDetector(
                     child: Text(
                       widget.model.creator.username,
-                      style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    onTap: () {
-                      Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade,duration: Duration(milliseconds: 100),child: ProfilePage(widget.model.creator.username)));
+                    onTap: () async {
+                      PageTransition trans;
+
+                      String username =
+                          (await StorageManager.isUserExist()).username;
+                      if (widget.model.creator.username != username)
+                        trans = PageTransition(
+                            type: PageTransitionType.rightToLeftWithFade,
+                            duration: Duration(milliseconds: 100),
+                            child: ProfilePage(widget.model.creator.username));
+                      else
+                        trans = PageTransition(
+                            type: PageTransitionType.rightToLeftWithFade,
+                            duration: Duration(milliseconds: 100),
+                            child: ProfilePageOwner(username));
+
+                      Navigator.push(context, trans);
                     },
                   ),
                 ),
@@ -158,8 +174,4 @@ class PublicationCardState extends State<PublicationCard>
       ),
     );
   }
-}
-
-Future<bool> onLikeButtonTapped(bool isLiked) async {
-  return !isLiked;
 }

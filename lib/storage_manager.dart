@@ -3,7 +3,7 @@ import './models/user.dart';
 import 'dart:convert';
 
 class StorageManager {
-  static void save(final String key, final String value) async{
+  static Future save(final String key, final String value) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString(key, value);
   }
