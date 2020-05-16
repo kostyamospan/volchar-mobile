@@ -19,4 +19,9 @@ class StorageManager {
     User rez = logedUser != "null" ? User.fromMap(jsonDecode(logedUser)) : null;
     return Future<User>(() => rez);
   }
+
+  static Future<void> saveUser(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString("user", jsonEncode(user.toMap()));
+  }
 }

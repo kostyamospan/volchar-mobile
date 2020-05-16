@@ -7,18 +7,83 @@ import 'package:deplom/models/publication.dart';
 import 'package:like_button/like_button.dart';
 
 class PublicationExtended extends StatefulWidget {
-  final Widget child;
+  // final Widget child;
   final Publication _model;
-  PublicationCardState card;
+  final Function callBack;
   Publication get model => _model;
 
-  PublicationExtended(this._model,this.card, {Key key, this.child}) : super(key: key);
+  PublicationExtended(this._model, this.callBack, {Key key}) : super(key: key);
 
   @override
   _PublicationExtendedState createState() => _PublicationExtendedState();
 }
 
 class _PublicationExtendedState extends State<PublicationExtended> {
+  Future<bool> onTap(bool isLiked) async {
+    if (isLiked) {
+      var oldValLiked = widget.model.isLiked;
+      var oldLikesCount = widget.model.likesCount;
+
+      setState(() {
+        widget.model.isLiked = false;
+        if (widget.model.likesCount >= 0) widget.model.likesCount--;
+      });
+      QueryApi.removeLike((await StorageManager.isUserExist())?.apiToken,
+              widget.model.imagePath)
+          .then((value) {
+        if (!value) {
+          setState(() {
+            widget.model.isLiked = oldValLiked;
+            widget.model.likesCount = oldLikesCount;
+          });
+          print("ERROOORR");
+        } else {
+          widget.callBack(widget.model.likesCount, widget.model.isLiked);
+        }
+        return false;
+      }).catchError((err) {
+        setState(() {
+          widget.model.isLiked = oldValLiked;
+          widget.model.likesCount = oldLikesCount;
+        });
+        print("EROORRRR");
+      });
+
+      return Future<bool>(() => !isLiked);
+    } else {
+      var oldValLiked = widget.model.isLiked;
+      var oldLikesCount = widget.model.likesCount;
+
+      setState(() {
+        widget.model.isLiked = true;
+        widget.model.likesCount++;
+      });
+      QueryApi.addLike((await StorageManager.isUserExist())?.apiToken,
+              widget.model.imagePath)
+          .then((value) {
+        if (!value) {
+          setState(() {
+            widget.model.isLiked = oldValLiked;
+            widget.model.likesCount = oldLikesCount;
+          });
+          print("ERROOORR");
+        } else {
+          widget.callBack(widget.model.likesCount, widget.model.isLiked);
+        }
+        return true;
+      }).catchError((err) {
+        setState(() {
+          widget.model.isLiked = oldValLiked;
+          widget.model.likesCount = oldLikesCount;
+        });
+
+        print("EROORRRR");
+      });
+    }
+
+    return Future<bool>(() => widget.model.isLiked);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,7 +91,6 @@ class _PublicationExtendedState extends State<PublicationExtended> {
       child: Stack(
         children: [
           Column(children: [
-
             Container(
               height: 50,
               color: Colors.white,
@@ -47,7 +111,6 @@ class _PublicationExtendedState extends State<PublicationExtended> {
                 ),
               ),
             ),
-            
             Container(
               color: Colors.white,
               child: Column(
@@ -86,18 +149,15 @@ class _PublicationExtendedState extends State<PublicationExtended> {
                           style: TextStyle(fontSize: 16, color: Colors.black),
                           children: [
                             TextSpan(
-                                text: widget._model.creator.username + ":",
+                                text: widget._model.creator.username + ": ",
                                 style: TextStyle(fontWeight: FontWeight.bold)),
-                            TextSpan(
-                                text:
-                                    " asdasdasas dasdas dass dasdasdasda sdasda sddasd as dasdasd asdasdas ddasd")
+                            TextSpan(text: widget._model.description)
                           ]),
                     ),
                   )
                 ],
               ),
             ),
-            
             Container(
                 color: Colors.white,
                 height: 50,
@@ -112,31 +172,7 @@ class _PublicationExtendedState extends State<PublicationExtended> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 bubblesSize: 0,
                                 likeCount: widget._model.likesCount,
-                                onTap: (isLiked) async {
-                                  if (isLiked) {
-                                    bool rez = await QueryApi.removeLike(
-                                        (await StorageManager.isUserExist())
-                                            ?.apiToken,
-                                        widget._model.imagePath);
-                                    if (rez) {
-                                      widget._model.isLiked = false;
-                                      widget._model.likesCount--;
-                                      return Future<bool>(() => !isLiked);
-                                    }
-                                  } else {
-                                    bool rez = await QueryApi.addLike(
-                                        (await StorageManager.isUserExist())
-                                            ?.apiToken,
-                                        widget._model.imagePath);
-                                    if (rez) {
-                                      widget._model.isLiked = true;
-                                      widget._model.likesCount++;
-                                      return Future<bool>(() => !isLiked);
-                                    }
-                                  }
-
-                                  return Future<bool>(() => isLiked);
-                                })),
+                                onTap: onTap)),
                         Padding(
                           padding: const EdgeInsets.only(left: 25),
                           child: GestureDetector(
@@ -160,11 +196,9 @@ class _PublicationExtendedState extends State<PublicationExtended> {
                         )
                       ],
                     ))),
-          
           ])
         ],
       ),
     );
   }
 }
-

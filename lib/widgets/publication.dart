@@ -16,39 +16,9 @@ class Wrappper {
 
 class PublicationCard extends StatefulWidget {
   final Widget child;
-  Publication model;
-  Wrappper likeButton;
-
-  PublicationCard(this.model, {Key key, this.child}) : super(key: key) {
-    likeButton = new Wrappper(LikeButton(
-        isLiked: model.isLiked,
-        mainAxisAlignment: MainAxisAlignment.start,
-        bubblesSize: 0,
-        likeCount: model.likesCount,
-        onTap: (isLiked) async {
-          if (isLiked) {
-            bool rez = await QueryApi.removeLike(
-                (await StorageManager.isUserExist())?.apiToken,
-                model.imagePath);
-            if (rez) {
-              model.isLiked = false;
-              model.likesCount--;
-              return Future<bool>(() => !isLiked);
-            }
-          } else {
-            bool rez = await QueryApi.addLike(
-                (await StorageManager.isUserExist())?.apiToken,
-                model.imagePath);
-            if (rez) {
-              model.isLiked = true;
-              model.likesCount++;
-              return Future<bool>(() => !isLiked);
-            }
-          }
-
-          return Future<bool>(() => isLiked);
-        }));
-  }
+  final Publication model;
+  
+  PublicationCard(this.model, {Key key, this.child}) : super(key: key);
 
   @override
   PublicationCardState createState() {
@@ -61,6 +31,72 @@ class PublicationCardState extends State<PublicationCard>
   //getLikeButton()=>
   @override
   bool get wantKeepAlive => true;
+  void callBack(int count, bool isLiked){
+    setState((){
+      widget.model.likesCount  = count;
+      widget.model.isLiked = isLiked;
+    });
+  }
+  Future<bool> onTap(bool isLiked) async {
+    if (isLiked) {
+      var oldValLiked = widget.model.isLiked;
+      var oldLikesCount = widget.model.likesCount;
+
+      setState(() {
+        widget.model.isLiked = false;
+        if (widget.model.likesCount > 0) widget.model.likesCount--;
+      });
+      QueryApi.removeLike((await StorageManager.isUserExist())?.apiToken,
+              widget.model.imagePath)
+          .then((value) {
+        if (!value) {
+          setState(() {
+            widget.model.isLiked = oldValLiked;
+            widget.model.likesCount = oldLikesCount;
+          });
+          print("ERROOORR");
+        }
+        return false;
+      }).catchError((err) {
+        setState(() {
+          widget.model.isLiked = oldValLiked;
+          widget.model.likesCount = oldLikesCount;
+        });
+        print("EROORRRR");
+      });
+
+      return Future<bool>(() => !isLiked);
+    } else {
+      var oldValLiked = widget.model.isLiked;
+      var oldLikesCount = widget.model.likesCount;
+
+      setState(() {
+        widget.model.isLiked = true;
+        widget.model.likesCount++;
+      });
+      QueryApi.addLike((await StorageManager.isUserExist())?.apiToken,
+              widget.model.imagePath)
+          .then((value) {
+        if (!value) {
+          setState(() {
+            widget.model.isLiked = oldValLiked;
+            widget.model.likesCount = oldLikesCount;
+          });
+          print("ERROOORR");
+        }
+        return true;
+      }).catchError((err) {
+        setState(() {
+          widget.model.isLiked = oldValLiked;
+          widget.model.likesCount = oldLikesCount;
+        });
+
+        print("EROORRRR");
+      });
+    }
+
+    return Future<bool>(() => widget.model.isLiked);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +150,7 @@ class PublicationCardState extends State<PublicationCard>
                   if (loadingProgress == null)
                     return GestureDetector(
                         onTap: () {
-                          toModal(context, widget.model, this);
+                          toModal(context, widget.model, this.callBack);
                         },
                         child: FittedBox(fit: BoxFit.cover, child: child));
 
@@ -142,7 +178,12 @@ class PublicationCardState extends State<PublicationCard>
                       children: <Widget>[
                         Container(
                             padding: EdgeInsets.only(left: 15),
-                            child: widget.likeButton.value),
+                            child: LikeButton(
+                                isLiked: widget.model.isLiked,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                bubblesSize: 0,
+                                likeCount: widget.model.likesCount,
+                                onTap: this.onTap)),
                         Padding(
                           padding: const EdgeInsets.only(left: 25),
                           child: GestureDetector(
@@ -152,7 +193,7 @@ class PublicationCardState extends State<PublicationCard>
                               size: 28,
                             ),
                             onTap: () {
-                              toModal(context, widget.model, this);
+                              toModal(context, widget.model, this.callBack);
                             },
                           ),
                         ),

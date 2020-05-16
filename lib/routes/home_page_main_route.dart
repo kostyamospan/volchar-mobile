@@ -1,6 +1,8 @@
 import 'package:deplom/query_api.dart';
+import 'package:deplom/routes/upload_route.dart';
 import 'package:deplom/storage_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import '../widgets/publication.dart';
 import '../models/user.dart';
 
@@ -31,18 +33,7 @@ class _HomePageState extends State<HomePage> {
         return new PublicationCard(apiRez[i]);
       });
       return rez;
-      // Future(()=>List<PublicationCard>.generate(10, (i){
-      //   return new PublicationCard(new Publication(creator: new User(username:"username"),imageUrl: "https://img4.goodfon.ru/wallpaper/nbig/3/a0/osen-derevia-pririoda.jpg"));
-      // }));//rez);
     });
-    // Future.delayed(
-    //     Duration(seconds: 2),
-    //     () => List<PublicationCard>.generate(0, (index) {
-    //           return new PublicationCard(new Publication(
-    //               creator: User(username: "_admin"),
-    //               imageUrl:
-    //                   "https://borodatiyvopros.com/wp-content/uploads/2020/01/TVr0lqwFGRg.jpg"));
-    //         }));
   }
 
   @override
@@ -62,12 +53,31 @@ class _HomePageState extends State<HomePage> {
                   if (snapshot.data != null) {
                     return RefreshIndicator(
                       onRefresh: () {
-                        print("asdasd");
                         return Future(() => null);
                       },
-                      child: ListView(
-                          //physics: AlwaysScrollableScrollPhysics(),
-                          children: snapshot.data as List<PublicationCard>),
+                      child: Stack(
+                        children: [
+                          ListView(
+                              //physics: AlwaysScrollableScrollPhysics(),
+                              children: snapshot.data as List<PublicationCard>),
+                          Positioned(
+                            bottom: 15,
+                            right: 15,
+                            child: FloatingActionButton(
+                              splashColor: Colors.white,
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    PageTransition(
+                                        duration: Duration(milliseconds: 100),
+                                        type: PageTransitionType.rightToLeft,
+                                        child: UploadRoute()));
+                              },
+                              child: Icon(Icons.add),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   } else {
                     return Text("Error");

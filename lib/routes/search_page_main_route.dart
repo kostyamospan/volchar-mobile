@@ -1,36 +1,15 @@
 import 'package:deplom/header.dart';
 import 'package:deplom/query_api.dart';
+import 'package:deplom/routes/profile_page.dart';
 import 'package:deplom/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:deplom/widgets/user_preview.dart';
+import 'package:page_transition/page_transition.dart';
 
 class SearchPage extends StatefulWidget {
   SearchPage({Key key}) : super(key: key) {
-    shownList = list;
+    shownList = List();
   }
-
-  final List<UserPreview> list = [
-    new UserPreview(
-        username: "username",
-        imagePath:
-            'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg'),
-    new UserPreview(
-        username: "nika",
-        imagePath:
-            'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg'),
-    new UserPreview(
-        username: "Tomes",
-        imagePath:
-            'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg'),
-    new UserPreview(
-        username: "xiixxixix",
-        imagePath:
-            'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg'),
-    new UserPreview(
-        username: "anton",
-        imagePath:
-            'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__340.jpg'),
-  ];
 
   List<UserPreview> shownList;
   @override
@@ -38,34 +17,81 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  void callback(List<UserPreview> list) {
+  String t = "";
+
+  void callback(List<UserPreview> list, String t) {
     setState(() {
-      widget.shownList = list;
+      print(t);
+      this.t = t;
+      widget.shownList = new List.from(list);
     });
   }
 
-  void drawList() {}
+  Future loadUsersFromServer(String username) async {
+    var res = await QueryApi.searchUser(
+        (await StorageManager.isUserExist()).apiToken, username);
+
+    setState(() {
+      if (res == null) {
+        widget.shownList = new List.generate(
+            1,
+            (index) => new UserPreview(
+                  username: "nothing found",
+                  imagePath: "",
+                ));
+      } else {
+        widget.shownList = new List.generate(res.length, (i) {
+          String username = res[i].username;
+          return new UserPreview(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      child: ProfilePage(username),
+                      type: PageTransitionType.rightToLeft));
+            },
+            username: username,
+            imagePath: res[i].profileImagePathWidthDomain,
+          );
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: List.generate(widget.shownList.length + 1, (i) {
-        if (i == 0) {
-          // if (widget.shownList.isEmpty) {
-          //   searchList = await QueryApi.searchUsers(
-          //       (await StorageManager.isUserExist()).apiToken);
-          // }
-
-          return Center(
-            child: Container(
-                padding: EdgeInsets.only(bottom: 10),
-                width: displayWidth(context) * 0.95,
-                child: SearchField(callback: callback, list: widget.list)),
-          );
-        }
-        return Center(
-            child: Padding(
-                padding: EdgeInsets.all(2), child: widget.shownList[i - 1]));
-      }),
+    return Stack(
+      children: <Widget>[
+        FutureBuilder(
+            future:
+                isListEmpty(widget.shownList) ? loadUsersFromServer(t) : null,
+            builder: (context, snapshot) {
+              if (isListEmpty(widget.shownList))
+                return ListView(padding: EdgeInsets.only(top: 70), children: [
+                  Center(
+                      child: Padding(
+                          padding: EdgeInsets.all(2),
+                          child: Text("Nothing found")))
+                ]);
+              return ListView(
+                padding: EdgeInsets.only(top: 70),
+                children: List.generate(widget.shownList.length, (i) {
+                  return Center(
+                      child: Padding(
+                          padding: EdgeInsets.all(2),
+                          child: widget.shownList[i]));
+                }),
+              );
+            }),
+        Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+              color: Colors.white,
+              padding: EdgeInsets.only(bottom: 10),
+              //width: displayWidth(context),
+              child: SearchField(callback: callback, list: widget.shownList)),
+        ),
+      ],
     );
   }
 }
@@ -83,19 +109,20 @@ class SearchField extends StatelessWidget {
       //padding: EdgeInsets.all(3),
       height: 50,
       width: displayWidth(context),
-      child: TextField(
-        decoration: InputDecoration(hintText: "search"),
-        onChanged: (t) {
-          if (t != null && t != "") {
-            if (t.length >= 3) {
-              print(list);
-              callback(search(list, t));
+      child: Padding(
+        padding: EdgeInsets.only(left:10,right: 10),
+              child: TextField(
+          decoration: InputDecoration(hintText: "search"),
+          onChanged: (t) {
+            if (t != null && t != "") {
+              if (t.length >= 3) {
+                callback(search(list, t), t);
+              } else {
+                callback(list);
+              }
             }
-          } else {
-            print(list);
-            callback(list);
-          }
-        },
+          },
+        ),
       ),
     );
   }
@@ -105,4 +132,10 @@ List<UserPreview> search(List<UserPreview> list, String str) {
   return List.generate(list.length, (i) {
     if (list[i].username.contains(str)) return list[i];
   });
+}
+
+bool isListEmpty(List list) {
+  int emptyCount = 0;
+  for (var i = 0; i < list.length; i++) if (list[i] == null) emptyCount++;
+  return emptyCount == list.length;
 }

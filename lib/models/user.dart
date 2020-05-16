@@ -38,7 +38,7 @@ class User {
     email = json["Email"];
     publicationsCount = json["PublicationsCount"];
     subsctibersCount = json["SubscribersCount"];
-    profileImagePath = json["ProfileImage"];
+    profileImagePath = json["ProfileImagePath"];
     profileImagePathWidthDomain = profileImagePath == null? null :  fullDomen + profileImagePath;
     isSubscribed = json["IsSubscribed"];
     
@@ -63,6 +63,6 @@ class User {
         'Password': password,
         'Email': email,
         'Publications': jsonEncode(publications),
-        'ProfileImage':profileImagePath
+        'ProfileImagePath':profileImagePath
       };
 }

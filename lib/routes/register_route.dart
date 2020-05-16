@@ -1,3 +1,6 @@
+import 'package:deplom/models/user.dart';
+import 'package:deplom/query_api.dart';
+import 'package:deplom/storage_manager.dart';
 import 'package:flutter/material.dart';
 import '../widgets/autorization_template.dart';
 import '../header.dart';
@@ -11,6 +14,19 @@ class RegisterRoute extends StatefulWidget {
 
 class _RegisterRouteState extends State<RegisterRoute> {
   final _formKey = GlobalKey<FormState>();
+  bool _isButtonPressed = false;
+
+  String _email;
+  String _password;
+  String _login;
+
+  void buttonReset() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _isButtonPressed = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,21 +54,23 @@ class _RegisterRouteState extends State<RegisterRoute> {
                       TextFormField(
                         decoration: InputDecoration(hintText: "Enter login"),
                         validator: (input) {
-                          if (loginReg.hasMatch(input) && input.length >= 6)
+                          if (loginReg.hasMatch(input) && input.length >= 6) {
+                            _login = input;
                             return null;
-                          else if (input.isEmpty)
+                          } else if (input.isEmpty)
                             return reqError;
                           else
                             return "Your name isnt valid";
                         },
                       ), //Login Field
-                    
+
                       TextFormField(
                         decoration: InputDecoration(hintText: "Enter Email"),
                         validator: (input) {
-                          if (emailReg.hasMatch(input))
+                          if (emailReg.hasMatch(input)) {
+                            _email = input;
                             return null;
-                          else if (input.isEmpty)
+                          } else if (input.isEmpty)
                             return reqError;
                           else
                             return "Your email isnt valid";
@@ -63,9 +81,10 @@ class _RegisterRouteState extends State<RegisterRoute> {
                         validator: (input) {
                           if (input.isEmpty)
                             return reqError;
-                          else if (pasReg.hasMatch(input))
+                          else if (pasReg.hasMatch(input)) {
+                            _password = input;
                             return null;
-                          else
+                          } else
                             return passError;
                         },
                       ), //Password Field
@@ -77,11 +96,50 @@ class _RegisterRouteState extends State<RegisterRoute> {
                         height: 40,
                         margin: EdgeInsets.only(top: 10, bottom: 5),
                         child: FlatButton(
-                          child: Text(
-                            "Register",
-                            textAlign: TextAlign.center,
-                          ),
-                          onPressed: () {},
+                          child: FutureBuilder(
+                              future: _isButtonPressed
+                                  ? QueryApi.register(new User(
+                                      email: _email,
+                                      password: _password,
+                                      username: _login))
+                                  : null,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  this.buttonReset();
+                                  return Text("Try again");
+                                }
+
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.active:
+                                  case ConnectionState.waiting:
+                                    return CircularProgressIndicator();
+                                  case ConnectionState.none:
+                                    return Text("Register");
+                                  case ConnectionState.done:
+                                    {
+                                      if (snapshot.data != null) {
+                                        StorageManager.saveUser(
+                                                snapshot.data as User)
+                                            .then((value) =>
+                                                Navigator.of(context)
+                                                    .pushNamedAndRemoveUntil(
+                                                        "/main",
+                                                        (route) => false));
+                                      }
+                                    }
+                                }
+                                return Text(
+                                  "Register",
+                                  textAlign: TextAlign.center,
+                                );
+                              }),
+                          onPressed: () {
+                            if (_formKey.currentState.validate()) {
+                              setState(() {
+                                _isButtonPressed = true;
+                              });
+                            }
+                          },
                         ),
                       ),
                     ],

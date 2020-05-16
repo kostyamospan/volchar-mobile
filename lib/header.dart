@@ -1,4 +1,3 @@
-import 'package:deplom/widgets/publication.dart';
 import 'package:flutter/material.dart';
 import 'package:deplom/models/publication.dart';
 import 'widgets/publication_full_modal.dart';
@@ -13,7 +12,7 @@ final RegExp emailReg = new RegExp(
 const String passError = 'Must be longer then 8 and less then 32 char. long';
 const String reqError = "The field is requared";
 
-const String domenName = "56483eaa.ngrok.io";
+const String domenName = "1b8d409e.ngrok.io";
 const String fullDomen = "https://$domenName";
 const String apiURL = "$fullDomen/api";
 
@@ -23,6 +22,6 @@ void navigateToRoute(BuildContext context, String route) {
   Navigator.pushNamedAndRemoveUntil(
       context, route, (Route<dynamic> route) => false);
 }
-toModal(BuildContext context, Publication data, PublicationCardState card) {
-  Navigator.of(context).push(PublicationFullInfo(data,card));
+toModal(BuildContext context, Publication data, Function callBack) {
+  Navigator.of(context).push(PublicationFullInfo(data,callBack));
 }

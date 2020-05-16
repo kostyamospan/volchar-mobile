@@ -2,13 +2,13 @@ import 'package:deplom/models/publication.dart';
 import 'package:deplom/widgets/publication.dart';
 import 'package:deplom/widgets/publication_with_discription.dart';
 import 'package:flutter/material.dart';
-import 'comment.dart'; 
+import 'comment.dart';
 
 class PublicationFullInfo extends ModalRoute<void> {
-
   final Publication data;
-  PublicationCardState card;
-  PublicationFullInfo(this.data,this.card);
+  final Function callBack;
+  
+  PublicationFullInfo(this.data,this.callBack);
   @override
   Duration get transitionDuration => Duration(milliseconds: 100);
 
@@ -43,17 +43,22 @@ class PublicationFullInfo extends ModalRoute<void> {
 
   Widget _buildOverlayContent(BuildContext context) {
     return Center(
-      child: ListView(children: <Widget>[
-        PublicationExtended(data,card),
-        Padding(
-          padding: const EdgeInsets.only(left:8.0),
-          child: Text("Comments: ",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-        ),
-        Comment(),
-        Comment(),
-        Comment(),
-        Comment()
-      ],),
+      child: ListView(
+        children: <Widget>[
+          PublicationExtended(data,this.callBack),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(
+              "Comments: ",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+          ),
+          Comment(),
+          Comment(),
+          Comment(),
+          Comment()
+        ],
+      ),
     );
   }
 

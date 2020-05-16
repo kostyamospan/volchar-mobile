@@ -27,7 +27,7 @@ class _LoginRouteState extends State<LoginRoute> {
     User user = new User(email: _mail, password: _password);
     User logedUser = await QueryApi.logIn(user);
     if(logedUser != null) StorageManager.save("user", jsonEncode(logedUser.toMap()));
-    else return Future.error(null);
+    else return Future.error(new Exception());
 
     return Future<User>(() => logedUser);
   }

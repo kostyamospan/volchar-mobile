@@ -3,13 +3,18 @@ import 'package:deplom/widgets/medium_size_circle_avatar.dart';
 import 'package:flutter/material.dart';
 
 class UserPreview extends StatelessWidget {
-  const UserPreview({this.username = "", this.imagePath = "", Key key})
+  const UserPreview(
+      {this.onTap, this.username = "", this.imagePath = "", Key key})
       : super(key: key);
+
   final String username;
   final String imagePath;
+  final Function onTap;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(3),
         decoration: BoxDecoration(

@@ -68,19 +68,19 @@ class ProfileHeader extends StatefulWidget {
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
-  Future<bool> subscribeF(bool isActive) async {
+  Future<bool> subscribeF(bool isSubscribed) async {
     bool isSuccess;
-    if (isActive) {
+    if (!isSubscribed) {
       isSuccess = await QueryApi.subscribe(
           (await StorageManager.isUserExist()).apiToken, widget.data.username);
       if (isSuccess) {
-        return Future<bool>(() => !isActive);
+        return Future<bool>(() => !isSubscribed);
       }
     } else {
       isSuccess = await QueryApi.unSubscribe(
           (await StorageManager.isUserExist()).apiToken, widget.data.username);
       if (isSuccess) {
-        return Future<bool>(() => !isActive);
+        return Future<bool>(() => !isSubscribed);
       }
     }
   }
@@ -194,9 +194,9 @@ class _SubscribeButtonState extends State<SubscribeButton> {
       child: GestureDetector(
         onTap: () async {
           if (widget.onTap != null) {
-            setState(() {
-              widget.onTap(widget.isSubscribed).then((resoult) {
-                widget.isSubscribed = !resoult;
+            widget.onTap(widget.isSubscribed).then((resoult) {
+              setState(() {
+                widget.isSubscribed = resoult;
               });
             });
           }
