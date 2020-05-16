@@ -15,7 +15,7 @@ class MainRoute extends StatefulWidget {
 }
 
 class _MainRouteState extends State<MainRoute> {
-  List<Widget> _routes = [SearchPage(), HomePage(), MessagePage()];
+  List<Widget> _routes = [SearchPage(), HomePage()];
   int _currentMenuPosition = 1;
   String imageUrl = "";
 
@@ -106,13 +106,6 @@ class _MainRouteState extends State<MainRoute> {
             ),
             title: SizedBox.shrink(),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.message,
-              color: Colors.white,
-            ),
-            title: SizedBox.shrink(),
-          )
         ],
       ),
     );

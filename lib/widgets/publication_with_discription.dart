@@ -173,16 +173,6 @@ class _PublicationExtendedState extends State<PublicationExtended> {
                                 bubblesSize: 0,
                                 likeCount: widget._model.likesCount,
                                 onTap: onTap)),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 25),
-                          child: GestureDetector(
-                            child: Icon(
-                              Icons.comment,
-                              color: Colors.grey,
-                              size: 28,
-                            ),
-                          ),
-                        ),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.only(right: 10),

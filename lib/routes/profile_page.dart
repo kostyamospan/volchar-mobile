@@ -113,25 +113,12 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             height: 10,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               SubscribeButton(
                 onTap: subscribeF,
                 isSubscribed: widget.data.isSubscribed,
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(3)),
-                  width: 150,
-                  height: 40,
-                  child: Center(
-                      child: Text("Message",
-                          style: TextStyle(fontSize: 20, color: Colors.white))),
-                ),
-              ),
+              ),   
             ],
           ),
           SizedBox(

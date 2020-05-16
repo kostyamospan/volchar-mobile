@@ -1,14 +1,12 @@
 import 'package:deplom/models/publication.dart';
-import 'package:deplom/widgets/publication.dart';
 import 'package:deplom/widgets/publication_with_discription.dart';
 import 'package:flutter/material.dart';
-import 'comment.dart';
 
 class PublicationFullInfo extends ModalRoute<void> {
   final Publication data;
   final Function callBack;
-  
-  PublicationFullInfo(this.data,this.callBack);
+
+  PublicationFullInfo(this.data, this.callBack);
   @override
   Duration get transitionDuration => Duration(milliseconds: 100);
 
@@ -33,10 +31,9 @@ class PublicationFullInfo extends ModalRoute<void> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    // This makes sure that text and other content follows the material style
+    
     return Material(
       type: MaterialType.transparency,
-      // make sure that the overlay content is not cut off
       child: _buildOverlayContent(context),
     );
   }
@@ -45,18 +42,7 @@ class PublicationFullInfo extends ModalRoute<void> {
     return Center(
       child: ListView(
         children: <Widget>[
-          PublicationExtended(data,this.callBack),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(
-              "Comments: ",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-          ),
-          Comment(),
-          Comment(),
-          Comment(),
-          Comment()
+          PublicationExtended(data, this.callBack),
         ],
       ),
     );
