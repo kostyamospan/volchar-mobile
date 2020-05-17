@@ -61,8 +61,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
 class ProfileHeader extends StatefulWidget {
   final User data;
-  const ProfileHeader(this.data, {Key key}) : super(key: key);
-
+  ProfileHeader(this.data, {Key key}) : super(key: key) {
+    _subCount = data.subsctibersCount;
+  }
+  int _subCount;
   @override
   _ProfileHeaderState createState() => _ProfileHeaderState();
 }
@@ -83,6 +85,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
         return Future<bool>(() => !isSubscribed);
       }
     }
+    return Future.error(new Exception());
   }
 
   @override
@@ -118,7 +121,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               SubscribeButton(
                 onTap: subscribeF,
                 isSubscribed: widget.data.isSubscribed,
-              ),   
+              ),
             ],
           ),
           SizedBox(
@@ -134,7 +137,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
                     SizedBox(
                       height: 5,
                     ),
-                    Text(widget.data.subsctibersCount.toString(),
+                    Text(widget._subCount.toString(),
                         style: TextStyle(fontSize: 20)),
                   ],
                 ),
@@ -181,11 +184,14 @@ class _SubscribeButtonState extends State<SubscribeButton> {
       child: GestureDetector(
         onTap: () async {
           if (widget.onTap != null) {
-            widget.onTap(widget.isSubscribed).then((resoult) {
-              setState(() {
-                widget.isSubscribed = resoult;
-              });
-            });
+            widget.onTap(widget.isSubscribed).then((value) => setState(() {
+                  print(value);
+                  widget.isSubscribed = value;
+                }));
+            // var res = await widget.onTap(widget.isSubscribed);
+            // setState(() {
+            //   widget.isSubscribed = res;
+            // });
           }
         },
         child: widget.isSubscribed != true

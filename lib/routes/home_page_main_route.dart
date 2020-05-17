@@ -50,38 +50,42 @@ class _HomePageState extends State<HomePage> {
                 break;
               case ConnectionState.done:
                 {
-                  if (snapshot.data != null) {
-                    return RefreshIndicator(
-                      onRefresh: () {
-                        return Future(() => null);
-                      },
-                      child: Stack(
-                        children: [
-                          ListView(
-                              //physics: AlwaysScrollableScrollPhysics(),
-                              children: snapshot.data as List<PublicationCard>),
-                          Positioned(
-                            bottom: 15,
-                            right: 15,
-                            child: FloatingActionButton(
-                              splashColor: Colors.white,
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    PageTransition(
-                                        duration: Duration(milliseconds: 100),
-                                        type: PageTransitionType.rightToLeft,
-                                        child: UploadRoute()));
-                              },
-                              child: Icon(Icons.add),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
+                  Widget content = Text("Error");
+                  if (snapshot.data != null &&
+                      (snapshot.data as List).length != 0) {
+                    content = ListView(
+                        children: snapshot.data as List<PublicationCard>);
                   } else {
-                    return Text("Error");
+                    content =
+                        Center(child: Text("Nothing in yours feed yet ;)"));
                   }
+
+                  return RefreshIndicator(
+                    onRefresh: () {
+                      return Future(() => null);
+                    },
+                    child: Stack(
+                      children: [
+                        content,
+                        Positioned(
+                          bottom: 15,
+                          right: 15,
+                          child: FloatingActionButton(
+                            splashColor: Colors.white,
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  PageTransition(
+                                      duration: Duration(milliseconds: 100),
+                                      type: PageTransitionType.rightToLeft,
+                                      child: UploadRoute()));
+                            },
+                            child: Icon(Icons.add),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
             }
           }),

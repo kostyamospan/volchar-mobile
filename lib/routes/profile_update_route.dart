@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart' as p;
 import 'package:image_crop/image_crop.dart';
-import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 
 class ProfileUpdateRoute extends StatefulWidget {
   ProfileUpdateRoute(this.image, this.username, {Key key}) : super(key: key);
@@ -25,22 +24,29 @@ class _ProfileUpdateRouteState extends State<ProfileUpdateRoute> {
   File _image;
   File _cropedImage;
   String _newUsername;
+  User _user;
 
   final cropKey = GlobalKey<CropState>();
 
   _ProfileUpdateRouteState() {
     _controller = new TextEditingController();
-    final text = "username";
-    _controller.value = TextEditingValue(
-      text: text,
-      selection: TextSelection.fromPosition(
-        TextPosition(offset: text.length),
-      ),
-    );
+  }
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final text = widget.username;
+      _controller.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: text.length),
+        ),
+      );
+    });
   }
 
-  Future getImage({p.ImageSource param = p.ImageSource.camera}) async {
-    var image = await p.ImagePicker.pickImage(source: param);
+  Future getImage({p.ImageSource param = p.ImageSource.gallery}) async {
+    var image = await p.ImagePicker. pickImage(source: param);
 
     setState(() {
       _image = image;
@@ -68,6 +74,11 @@ class _ProfileUpdateRouteState extends State<ProfileUpdateRoute> {
       _cropedImage = file;
     });
     sample.delete();
+  }
+
+  Future saveUser(User _user) async {
+    await StorageManager.saveUser(_user);
+    Navigator.pop(context);
   }
 
   Future<User> updateProfile() async {
@@ -169,14 +180,13 @@ class _ProfileUpdateRouteState extends State<ProfileUpdateRoute> {
                           _isButtonPressed = false;
 
                           if (snapshot.data != null) {
-  
-                            StorageManager.saveUser(snapshot.data as User)
-                                .then((value) {
-                             
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              setState(() async {
+                                _user = snapshot.data;
+                                await saveUser(_user);
+                              });
                             });
 
-                            Navigator.pushNamedAndRemoveUntil(
-                                context, "/main", (route) => false);
                             return Text("Success!");
                           }
                       }
@@ -184,15 +194,6 @@ class _ProfileUpdateRouteState extends State<ProfileUpdateRoute> {
                       return SizedBox.shrink();
                     }),
               ),
-            ),
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: _cropedImage == null
-                          ? widget.image
-                          : Image.file(_cropedImage).image)),
             ),
             Offstage(
               offstage: true,

@@ -1,5 +1,4 @@
 import 'package:deplom/models/user.dart';
-import 'package:deplom/routes/message_page_main_route.dart';
 import 'package:deplom/routes/profile_owner_page.dart';
 import 'package:deplom/storage_manager.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,10 @@ class MainRoute extends StatefulWidget {
 }
 
 class _MainRouteState extends State<MainRoute> {
-  List<Widget> _routes = [SearchPage(), HomePage()];
+  static SearchPage get searchPage => new SearchPage();
+  static HomePage get homePage => new HomePage();
+
+  List<StatefulWidget> _routes = [searchPage, homePage];
   int _currentMenuPosition = 1;
   String imageUrl = "";
 

@@ -54,7 +54,8 @@ class _RegisterRouteState extends State<RegisterRoute> {
                       TextFormField(
                         decoration: InputDecoration(hintText: "Enter login"),
                         validator: (input) {
-                          if (loginReg.hasMatch(input) && input.length >= 6) {
+                          if (loginReg.hasMatch(input.trim()) &&
+                              input.trim().length >= 6) {
                             _login = input;
                             return null;
                           } else if (input.isEmpty)
@@ -67,7 +68,7 @@ class _RegisterRouteState extends State<RegisterRoute> {
                       TextFormField(
                         decoration: InputDecoration(hintText: "Enter Email"),
                         validator: (input) {
-                          if (emailReg.hasMatch(input)) {
+                          if (emailReg.hasMatch(input.trim())) {
                             _email = input;
                             return null;
                           } else if (input.isEmpty)
@@ -77,6 +78,7 @@ class _RegisterRouteState extends State<RegisterRoute> {
                         },
                       ), //Email Field
                       TextFormField(
+                        obscureText: true,
                         decoration: InputDecoration(hintText: "Enter Password"),
                         validator: (input) {
                           if (input.isEmpty)
