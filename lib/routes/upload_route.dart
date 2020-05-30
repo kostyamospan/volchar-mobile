@@ -5,7 +5,6 @@ import 'package:deplom/storage_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart' as p;
 import 'package:image_crop/image_crop.dart';
-import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 
 class UploadRoute extends StatefulWidget {
   UploadRoute({Key key}) : super(key: key);

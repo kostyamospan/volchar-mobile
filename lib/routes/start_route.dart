@@ -7,8 +7,6 @@ import '../storage_manager.dart';
 import '../models/user.dart';
 import '../header.dart';
 
-
-
 class StartRoute extends StatefulWidget {
   StartRoute({Key key}) : super(key: key);
 
@@ -19,51 +17,34 @@ class StartRoute extends StatefulWidget {
 class _StartRouteState extends State<StartRoute> {
   Widget _widget = new CircularProgressIndicator();
 
-  void onLoad() async {
+  Future<User> load() async {
     bool isSuccess = true;
     bool isAutorized = false;
     User user;
     try {
-       user = await StorageManager.isUserExist();
+      user = await StorageManager.isUserExist();
 
-      if (user == null) {
-        navigateToRoute(context, "/login");
-        return;
-      }
+      if (user == null) return user;
+      //navigateToRoute(context, "/login");
 
       isAutorized = await QueryApi.userIsValid(user);
-      print(isAutorized);
     } catch (Exception) {
       isSuccess = false;
     }
     if (isSuccess) {
       if (isAutorized) {
-      await StorageManager.save("user", jsonEncode(user.toMap()));
+        await StorageManager.save("user", jsonEncode(user.toMap()));
         navigateToRoute(context, "/main");
       } else {
         navigateToRoute(context, "/login");
       }
-    } else {
-      setStateIcon(Icons.remove_circle_outline, Colors.red);
-      Future.delayed(const Duration(seconds: 5), () => onLoad());
-    }
-  }
-
-  void setStateIcon(IconData icon, Color color) {}
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      this.onLoad();
-    });
+    } else {}
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text("hii")),
+        appBar: AppBar(),
         body: AutTemlate(
           child: Center(
             child: Column(
@@ -72,11 +53,72 @@ class _StartRouteState extends State<StartRoute> {
                 SizedBox(
                   width: 300,
                   height: 300,
-                  child: SvgPicture.asset('assets/untitled.svg'),
+                  child: Image.asset('assets/untitled.png'),
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 20),
-                  child: _widget,
+                  child: FutureBuilder(
+                      future: StorageManager.isUserExist(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Text("Storage error");
+                          //return Icon(Icons.cancel, color: Colors.red);
+                        }
+                        switch (snapshot.connectionState) {
+                          case ConnectionState.waiting:
+                          case ConnectionState.active:
+                            return new CircularProgressIndicator();
+                          case ConnectionState.done:
+                            {
+                              if (snapshot.data != null) {
+                                return new FutureBuilder(
+                                  future: QueryApi.userIsValid(snapshot.data),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) {
+                                      // return Icon(Icons.cancel,
+                                      //     color: Colors.red);
+                                      return Text("Connection error");
+                                    }
+                                    switch (snapshot.connectionState) {
+                                      case ConnectionState.waiting:
+                                      case ConnectionState.active:
+                                        return new CircularProgressIndicator();
+                                      case ConnectionState.done:
+                                        {
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) {
+                                            if (snapshot.data as bool) {
+                                              navigateToRoute(context, "/main");
+                                            } else {
+                                              navigateToRoute(
+                                                  context, "/login");
+                                            }
+                                          });
+                                          return Icon(
+                                            Icons.check_circle,
+                                            color: Colors.green,
+                                            size: 20,
+                                          );
+                                        }
+                                        break;
+                                      default:
+                                        return null;
+                                    }
+                                  },
+                                );
+                              } else {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  navigateToRoute(context, "/login");
+                                });
+                              }
+                            }
+                            break;
+                          default:
+                            return new SizedBox.shrink();
+                        }
+                        return new SizedBox.shrink();
+                      }),
                 ),
               ],
             ),
@@ -84,4 +126,3 @@ class _StartRouteState extends State<StartRoute> {
         ));
   }
 }
-

@@ -51,33 +51,33 @@ class _MainRouteState extends State<MainRoute> {
                           (await StorageManager.isUserExist())?.username)));
             },
             child: Container(
-              child: Row(children: [
-                Center(
-                    child: FutureBuilder(
-                  future: new Future<User>(() => StorageManager.isUserExist()),
-                  builder: (builder, snapshot) {
-                    imageUrl =
-                        (snapshot.data as User).profileImagePathWidthDomain;
-
-                    return Text(snapshot?.data?.username,
-                        style: TextStyle(fontSize: 20, color: Colors.white));
-                  },
-                )),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10, right: 15.0),
-                  child: CircleAvatar(
-                    radius: 18,
-                    child: ClipOval(
-                      child: Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        height: 36,
-                        width: 36,
-                      ),
-                    ),
-                  ),
-                ),
-              ]),
+              child: FutureBuilder(
+                  future: StorageManager.isUserExist(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Row(children: [
+                        Center(
+                            child: Text(snapshot?.data?.username,
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white))),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10, right: 15.0),
+                          child: CircleAvatar(
+                            radius: 18,
+                            child: ClipOval(
+                              child: Image.network(
+                                ((snapshot?.data) as User)
+                                    .profileImagePathWidthDomain,
+                                fit: BoxFit.cover,
+                                height: 36,
+                                width: 36,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]);
+                    }
+                  }),
             ),
           ),
         ],

@@ -60,17 +60,11 @@ class _LoginRouteState extends State<LoginRoute> {
                         validator: (input) {
                           if(input!=null)
                             _mail = input;
-                          // if (emailReg.hasMatch(input)) {
-                          //   
-                          //   return null;
-                          // } else if (input == null) {
-                          //   return reqError;
-                          // } else {
-                          //   return "Your email isnt valid";
-                          // }
+                            return null;
                         },
                       ),
                       TextFormField(
+                        obscureText: true,
                         decoration: InputDecoration(
                             fillColor: Colors.black,
                             contentPadding: EdgeInsets.all(0),
