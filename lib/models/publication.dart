@@ -51,9 +51,4 @@ class Publication {
   String toJson() => json.encode(toMap());
 
   static Publication fromJson(String source) => fromMap(json.decode(source));
-
-  String toFormatDate() =>
-      "${date.day < 10 ? '0' + date.day.toString() : date.day.toString()}." +
-      "${date.month < 10 ? '0' + date.month.toString() : date.month.toString()}." +
-      "${date.year}";
 }

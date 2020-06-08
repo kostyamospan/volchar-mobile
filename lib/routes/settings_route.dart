@@ -26,7 +26,8 @@ class _SettingsRouteState extends State<SettingsRoute> {
                   context,
                   PageTransition(
                       child: ProfileUpdateRoute(
-                          Image.network(user?.profileImagePathWidthDomain ?? "").image,
+                          Image.network(user?.profileImagePathWidthDomain ?? "")
+                              .image,
                           user?.username),
                       type: PageTransitionType.rightToLeft,
                       duration: Duration(milliseconds: 100)));

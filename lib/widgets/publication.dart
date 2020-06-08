@@ -7,6 +7,7 @@ import 'package:deplom/header.dart';
 import 'package:deplom/models/publication.dart';
 import 'package:like_button/like_button.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:deplom/date_time_extensions.dart';
 
 class Wrappper {
   LikeButton value;
@@ -17,7 +18,7 @@ class Wrappper {
 class PublicationCard extends StatefulWidget {
   final Widget child;
   final Publication model;
-  
+
   PublicationCard(this.model, {Key key, this.child}) : super(key: key);
 
   @override
@@ -28,15 +29,15 @@ class PublicationCard extends StatefulWidget {
 
 class PublicationCardState extends State<PublicationCard>
     with AutomaticKeepAliveClientMixin {
-  //getLikeButton()=>
   @override
   bool get wantKeepAlive => true;
-  void callBack(int count, bool isLiked){
-    setState((){
-      widget.model.likesCount  = count;
+  void callBack(int count, bool isLiked) {
+    setState(() {
+      widget.model.likesCount = count;
       widget.model.isLiked = isLiked;
     });
   }
+
   Future<bool> onTap(bool isLiked) async {
     if (isLiked) {
       var oldValLiked = widget.model.isLiked;
@@ -98,6 +99,20 @@ class PublicationCardState extends State<PublicationCard>
     return Future<bool>(() => widget.model.isLiked);
   }
 
+  Future<bool> _deletePublication() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => Center(child: new CircularProgressIndicator()),
+    );
+    var user = await StorageManager.isUserExist();
+    var res =
+        await QueryApi.deletePublication(user.apiToken, widget.model.imagePath);
+
+    Navigator.of(context).pop();
+    return res;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -111,31 +126,91 @@ class PublicationCardState extends State<PublicationCard>
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: GestureDetector(
-                    child: Text(
-                      widget.model.creator.username,
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () async {
-                      PageTransition trans;
+                  padding: const EdgeInsets.only(left: 10, right: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      GestureDetector(
+                        child: Text(
+                          widget.model.creator.username,
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        onTap: () async {
+                          PageTransition trans;
 
-                      String username =
-                          (await StorageManager.isUserExist()).username;
-                      if (widget.model.creator.username != username)
-                        trans = PageTransition(
-                            type: PageTransitionType.rightToLeftWithFade,
-                            duration: Duration(milliseconds: 100),
-                            child: ProfilePage(widget.model.creator.username));
-                      else
-                        trans = PageTransition(
-                            type: PageTransitionType.rightToLeftWithFade,
-                            duration: Duration(milliseconds: 100),
-                            child: ProfilePageOwner(username));
+                          String username =
+                              (await StorageManager.isUserExist()).username;
+                          if (widget.model.creator.username != username)
+                            trans = PageTransition(
+                                type: PageTransitionType.rightToLeftWithFade,
+                                duration: Duration(milliseconds: 100),
+                                child:
+                                    ProfilePage(widget.model.creator.username));
+                          else
+                            trans = PageTransition(
+                                type: PageTransitionType.rightToLeftWithFade,
+                                duration: Duration(milliseconds: 100),
+                                child: ProfilePageOwner(username));
 
-                      Navigator.push(context, trans);
-                    },
+                          Navigator.push(context, trans);
+                        },
+                      ),
+                      GestureDetector(
+                          onTap: () async {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text("Delete this publication?"),
+                                content: Text("This action cannot be undone!"),
+                                //actionsPadding: EdgeInsets.all(10),
+                                elevation: 10,
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text(
+                                      "Cancel",
+                                      style: TextStyle(
+                                          fontSize: 30, color: Colors.blue),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  FlatButton(
+                                    child: Text(
+                                      "Yes",
+                                      style: TextStyle(
+                                          fontSize: 30, color: Colors.blue),
+                                    ),
+                                    onPressed: () async {
+                                      var user =
+                                          await StorageManager.isUserExist();
+                                      await _deletePublication();
+                                      Navigator.of(context).pop();
+                                      Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(
+                                              builder: (context) => user
+                                                          .username !=
+                                                      widget.model.creator
+                                                          .username
+                                                  ? ProfilePage(widget
+                                                      .model.creator.username)
+                                                  : ProfilePageOwner(
+                                                      user.username)));
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            //
+                          },
+                          child: Icon(
+                            Icons.restore_from_trash,
+                            color: Colors.black87,
+                            size: 30,
+                          ))
+                    ],
                   ),
                 ),
               ),
@@ -190,7 +265,7 @@ class PublicationCardState extends State<PublicationCard>
                             child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  widget.model.toFormatDate(),
+                                  widget.model.date.toFormatedDate(),
                                   style: TextStyle(color: Colors.grey),
                                 )),
                           ),
@@ -203,3 +278,5 @@ class PublicationCardState extends State<PublicationCard>
     );
   }
 }
+
+_deletePublication() {}

@@ -44,6 +44,7 @@ class _ProfilePageOwnerState extends State<ProfilePageOwner> {
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.none:
+                return SizedBox.shrink();
               case ConnectionState.waiting:
               case ConnectionState.active:
                 return Center(child: CircularProgressIndicator());
@@ -152,5 +153,4 @@ class ProfileHeaderOwner extends StatelessWidget {
       ),
     );
   }
-
 }

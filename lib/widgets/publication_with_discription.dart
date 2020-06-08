@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:deplom/header.dart';
 import 'package:deplom/models/publication.dart';
 import 'package:like_button/like_button.dart';
+import 'package:deplom/date_time_extensions.dart';
+
 
 class PublicationExtended extends StatefulWidget {
   // final Widget child;
@@ -105,7 +107,6 @@ class _PublicationExtendedState extends State<PublicationExtended> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     onTap: () {
-                      print("asdasd");
                     },
                   ),
                 ),
@@ -144,7 +145,6 @@ class _PublicationExtendedState extends State<PublicationExtended> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: RichText(
-                      //textAlign: TextAlign.start,
                       text: TextSpan(
                           style: TextStyle(fontSize: 16, color: Colors.black),
                           children: [
@@ -179,7 +179,7 @@ class _PublicationExtendedState extends State<PublicationExtended> {
                             child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  widget._model.toFormatDate(),
+                                  widget._model.date.toFormatedDate(),
                                   style: TextStyle(color: Colors.grey),
                                 )),
                           ),

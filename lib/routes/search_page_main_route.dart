@@ -50,6 +50,7 @@ class _SearchPageState extends State<SearchPage> {
             Navigator.push(
                 context,
                 PageTransition(
+                    duration: Duration(milliseconds: 100),
                     child: user.username == username
                         ? ProfilePageOwner(user.username)
                         : ProfilePage(username),
@@ -116,8 +117,8 @@ List<UserPreview> search(List<UserPreview> list, String str) {
 }
 
 bool isListEmpty(List list) {
-  if(list == null) return null;
-  
+  if (list == null) return null;
+
   int emptyCount = 0;
   for (var i = 0; i < list.length; i++) if (list[i] == null) emptyCount++;
   return emptyCount == list.length;

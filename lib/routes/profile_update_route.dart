@@ -45,8 +45,8 @@ class _ProfileUpdateRouteState extends State<ProfileUpdateRoute> {
     });
   }
 
-  Future getImage({p.ImageSource param = p.ImageSource.gallery}) async {
-    var image = await p.ImagePicker. pickImage(source: param);
+  Future getImage({p.ImageSource param = p.ImageSource.camera}) async {
+    var image = await p.ImagePicker.pickImage(source: param);
 
     setState(() {
       _image = image;
@@ -60,6 +60,7 @@ class _ProfileUpdateRouteState extends State<ProfileUpdateRoute> {
     if (area == null) {
       throw new Exception();
     }
+    if (_image == null) return;
 
     final sample = await ImageCrop.sampleImage(
       file: _image,
@@ -106,7 +107,32 @@ class _ProfileUpdateRouteState extends State<ProfileUpdateRoute> {
             Center(
               child: GestureDetector(
                 onTap: () async {
-                  await getImage().then((value) => _cropImage());
+                  showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                            title: Text("Chose image from: "),
+                            actions: <Widget>[
+                              RaisedButton(
+                                child: Text("Gallery"),
+                                onPressed: () async {
+                                  Navigator.of(context).pop();
+                                  getImage(param: p.ImageSource.gallery).then(
+                                      (value) =>
+                                          value != null ? _cropImage() : null);
+                                  // .then((value) =>
+                                  //     );
+                                },
+                              ),
+                              RaisedButton(
+                                child: Text("Camera"),
+                                onPressed: () async {
+                                  Navigator.of(context).pop();
+                                  getImage().then((value) => _cropImage()).then(
+                                      (value) => Navigator.of(context).pop());
+                                },
+                              )
+                            ],
+                          ));
                 },
                 child: Stack(
                   children: [

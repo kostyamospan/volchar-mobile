@@ -29,14 +29,14 @@ class _UploadRouteState extends State<UploadRoute> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
+  // @override
+  // void initState() {
+  //   super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      this.getImage();
-    });
-  }
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     this.getImage();
+  //   });
+  // }
 
   Future<bool> uploadImage() async {
     return QueryApi.upload(widget._cropedImage,
@@ -76,16 +76,51 @@ class _UploadRouteState extends State<UploadRoute> {
           children: <Widget>[
             GestureDetector(
                 child: Container(
+              decoration: new BoxDecoration(
+                color: Color(0xfffafafa),
+                boxShadow: [
+                  new BoxShadow(
+                    color: Colors.black,
+                    blurRadius: 10.0,
+                  ),
+                ],
+              ),
               width: displayWidth(context),
               height: displayWidth(context),
               child: widget._image == null
-                  ? Center(child: Text("Null"))
+                  ? Center(
+                      child: Container(
+                      width: displayWidth(context) * 0.8,
+                      child: Text(
+                        "Choose image just by pressing relevant button bellow",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ))
                   : Crop(
+                      
                       alwaysShowGrid: true,
                       key: cropKey,
                       aspectRatio: 1 / 1,
                       image: Image.file(widget._image).image),
             )),
+            SizedBox(height: 20,),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  RaisedButton(
+                    child: Text("Choose from gallery"),
+                    onPressed: () {
+                      getImage(param: p.ImageSource.gallery);
+                    },
+                  ),
+                  RaisedButton(
+                    child: Text("Take camera shot"),
+                    onPressed: () {
+                      getImage(param: p.ImageSource.camera);
+                    },
+                  )
+                ]),
             Container(
                 padding: EdgeInsets.only(top: 20, bottom: 20),
                 width: displayWidth(context) * 0.85,
@@ -98,44 +133,52 @@ class _UploadRouteState extends State<UploadRoute> {
                       helperText: "Description", border: OutlineInputBorder()),
                   style: TextStyle(fontSize: 15.0, color: Colors.black),
                 )),
-            RaisedButton(
-              padding: EdgeInsets.all(15),
-              onPressed: () async {
-                if (widget._image != null && !_isPressed) {
-                  _cropImage();
-                  _isPressed = true;
-                }
-              },
-              child: FutureBuilder(
-                  future: widget._cropedImage != null && _isPressed
-                      ? uploadImage()
-                      : null,
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                        return Text(
-                          "Publish",
-                          style: TextStyle(fontSize: 20),
-                        );
-                      case ConnectionState.active:
-                      case ConnectionState.waiting:
-                        return CircularProgressIndicator();
-                      case ConnectionState.done:
-                        {
-                          if (snapshot.hasError)
-                            return Text("Error, try again");
+            Container(
+              width: displayWidth(context) * 0.85,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  RaisedButton(
+                    padding: EdgeInsets.all(15),
+                    onPressed: () async {
+                      if (widget._image != null && !_isPressed) {
+                        _cropImage();
+                        _isPressed = true;
+                      }
+                    },
+                    child: FutureBuilder(
+                        future: widget._cropedImage != null && _isPressed
+                            ? uploadImage()
+                            : null,
+                        builder: (context, snapshot) {
+                          switch (snapshot.connectionState) {
+                            case ConnectionState.none:
+                              return Text(
+                                "Publish",
+                                style: TextStyle(fontSize: 20),
+                              );
+                            case ConnectionState.active:
+                            case ConnectionState.waiting:
+                              return CircularProgressIndicator();
+                            case ConnectionState.done:
+                              {
+                                if (snapshot.hasError)
+                                  return Text("Error, try again");
 
-                          if (snapshot.data != null) {
-                            if (snapshot.data as bool) {
-                              Navigator.pop(context);
-                              return Text("Success");
-                            } else {
-                              return Text("Error");
-                            }
+                                if (snapshot.data != null) {
+                                  if (snapshot.data as bool) {
+                                    Navigator.pop(context);
+                                    return Text("Success");
+                                  } else {
+                                    return Text("Error");
+                                  }
+                                }
+                              }
                           }
-                        }
-                    }
-                  }),
+                        }),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

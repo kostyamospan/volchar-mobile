@@ -1,4 +1,6 @@
+import 'package:deplom/models/comment.dart';
 import 'package:deplom/models/publication.dart';
+import 'widgets/comment.dart';
 
 import './models/user.dart';
 import './models/publication.dart';
@@ -249,6 +251,69 @@ class QueryApi {
     } catch (Exception) {
       return null;
       //return Future.error(new Exception());
+    }
+  }
+
+  static Future<List<UserComment>> getPublicationComments(
+      String apiToken, String imagePath) async {
+    try {
+      http.Response response = await http.post(
+          "$apiURL/app/getPublicationComments",
+          body: jsonEncode({'apiToken': apiToken, 'imagePath': imagePath}),
+          headers: {'Content-type': 'application/json'});
+
+      if (response.statusCode == 200) {
+        List rez = response.body != "null"
+            ? List.from(jsonDecode(response.body))
+            : null;
+        print(rez);
+        List<UserComment> list = [];
+
+        for (var item in rez) {
+          list.add(new UserComment(Comment.fromMap(item)));
+        }
+        return list;
+      } else
+        return Future.error(new Exception());
+    } catch (Exception) {
+      return Future.error(null);
+    }
+  }
+
+  static Future<UserComment> leaveComment(
+      String apiToken, String imagePath, String comment) async {
+    try {
+      http.Response response = await http.post(
+          "$apiURL/app/addPublicationComment",
+          body: jsonEncode({
+            'apiToken': apiToken,
+            'imagePath': imagePath,
+            'comment': comment
+          }),
+          headers: {'Content-type': 'application/json'});
+
+      if (response.statusCode == 200) {
+        return new UserComment(Comment.fromJson(response.body));
+      } else
+        return Future.error(new Exception());
+    } catch (Exception) {
+      return Future.error(null);
+    }
+  }
+
+  static Future<bool> deletePublication(
+      String apiToken, String imagePath) async {
+    try {
+      http.Response response = await http.post("$apiURL/app/deletePublication",
+          body: jsonEncode({'apiToken': apiToken, 'imagePath': imagePath}),
+          headers: {'Content-type': 'application/json'});
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (Exception) {
+      return Future.error(null);
     }
   }
 }
